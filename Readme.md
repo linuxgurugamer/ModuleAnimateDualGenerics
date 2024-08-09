@@ -1,6 +1,6 @@
 ModuleAnimateBeacon
 
-This mod provides a simple module which lets you have two active animations working at the same time.
+This mod provides a simple module which lets you have two active animations in the same part working at the same time.
 The basic module stanza is as follows (values shown are defaults)
 
 	MODULE
