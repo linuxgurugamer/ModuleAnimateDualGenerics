@@ -1,0 +1,32 @@
+{
+  "NAME": "ModuleAnimateDualGenerics",
+  "URL": "http://ksp.spacetux.net/avc/ModuleAnimateDualGenerics",
+  "DOWNLOAD": "https://github.com/linuxgurugamer/ModuleAnimateDualGenerics/releases",
+  "CHANGELOG": "https://raw.githubusercontent.com/linuxgurugamer/ModuleAnimateDualGenerics/master/Changelog.txt",
+  "GITHUB": {
+    "USERNAME": "linuxgurugamer",
+    "REPOSITORY": "ModuleAnimateDualGenerics",
+    "ALLOW_PRE_RELEASE": false
+  },
+  "VERSION": {
+    "MAJOR": 0,
+    "MINOR": 0,
+    "PATCH": 1,
+    "BUILD": 2
+  },
+  "KSP_VERSION": {
+    "MAJOR": 1,
+    "MINOR": 12,
+    "PATCH": 0
+  },
+  "KSP_VERSION_MIN": {
+    "MAJOR": 1,
+    "MINOR": 9,
+    "PATCH": 0
+  },
+  "KSP_VERSION_MAX": {
+    "MAJOR": 1,
+    "MINOR": 12,
+    "PATCH": 99
+  }
+}
