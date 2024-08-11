@@ -16,12 +16,20 @@ namespace DualGenerics
 
         [KSPField]
         public string activateActionName = "Turn On <<1>>";
+        [KSPField]
+        public string activateAnim_1_Name = "";
+        [KSPField]
+        public string activateAnim_2_Name = "";
 
         [KSPField]
         public string stopActionName = "Turn Off <<1>>";
+        [KSPField]
+        public string stopAnim_1_Name = "";
+        [KSPField]
+        public string stopAnim_2_Name = "";
 
         [KSPField]
-        public string toggleActionName = "Toggle";
+        public string toggleActionName = "Toggle <<1>>";
 
         [KSPField]
         public string moduleType = "Beacon";
@@ -34,22 +42,27 @@ namespace DualGenerics
 
         [KSPField]
         public KSPActionGroup defaultActionGroup;
-
         [KSPField(isPersistant = true)]
         public bool beaconOn = false;
+
+        [KSPField(isPersistant = true)]
+        public bool anim_1_On = false;
+        
+        [KSPField(isPersistant = true)]
+        public bool anim_2_On = false;
 
 
         #endregion
 
         Animation DeployAnimation, ActiveAnimation;
 
-
-        [KSPEvent(guiActive = true, guiActiveEditor = true)]
-        public void Deploy()
+        void StartAnim_1(bool dual = false)
         {
-            beaconOn = true;
-            Events["Deploy"].active = false;
-            Events["Stop"].active = true;
+            anim_1_On = true;
+            Events["ActivateAnim_1"].active = false;
+            if (stopAnim_1_Name != "")
+                Events["StopAnim_1"].active = true;
+
             if (DeployAnimation != null)
             {
                 part.Effect(anim_1_name, 1f);
@@ -57,6 +70,41 @@ namespace DualGenerics
                 DeployAnimation[anim_1_name].weight = 1f;
                 DeployAnimation.Play(anim_1_name);
             }
+        }
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        public void ActivateAnim_1()
+        {
+            StartAnim_1();
+        }
+
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        void StopAnim_1()
+        {
+            anim_1_On = false;
+
+            Events["StopAnim_1"].active = false;
+            if (activateAnim_1_Name != string.Empty)
+                Events["ActivateAnim_1"].active = true;
+
+            if (DeployAnimation != null)
+            {
+                DeployAnimation[anim_1_name].speed = -1000f;
+                DeployAnimation.Play(anim_1_name);
+            }
+
+        }
+
+
+        void StartAnim_2(bool dual = false)
+        {
+            anim_2_On = false;
+
+            Events["ActivateAnim_2"].active = false;
+            if (stopAnim_2_Name != "")
+                Events["StopAnim_2"].active = true;
+
 
             if (ActiveAnimation != null)
             {
@@ -71,6 +119,50 @@ namespace DualGenerics
                 }
                 ActiveAnimation.Play(anim_2_name);
             }
+
+        }
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        void StopAnim_2()
+        {
+            Events["StopAnim_2"].active = false;
+            if (activateAnim_2_Name != string.Empty)
+                Events["ActivateAnim_2"].active = true;
+
+            if (ActiveAnimation != null)
+            {
+                ActiveAnimation.Stop(anim_2_name);
+            }
+        }
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        public void ActivateAnim_2()
+        {
+            StartAnim_2();
+        }
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        public void Deploy()
+        {
+            beaconOn = true;
+            Events["Deploy"].active = false;
+            Events["Stop"].active = true;
+            StartAnim_1(true);
+
+            StartAnim_2(true);
+
+        }
+
+        [KSPEvent(guiActive = true, guiActiveEditor = true)]
+        public void Stop()
+        {
+            beaconOn = false;
+            Events["Deploy"].active = true;
+            Events["Stop"].active = false;
+
+            StopAnim_1();
+            StopAnim_2();
+
         }
 
         IEnumerator SlowUpdate()
@@ -90,14 +182,10 @@ namespace DualGenerics
         [KSPEvent(guiActive = true, guiActiveEditor = true)]
         public void Toggle()
         {
-            if (beaconOn)
-            {
+            if (beaconOn || anim_1_On || anim_2_On)
                 Stop();
-            }
             else
-            {
                 Deploy();
-            }
         }
 
         [KSPAction("Toggle-Action", KSPActionGroup.REPLACEWITHDEFAULT)]
@@ -106,24 +194,8 @@ namespace DualGenerics
             Toggle();
         }
 
-        [KSPEvent(guiActive = true, guiActiveEditor = true)]
-        public void Stop()
-        {
-            beaconOn = false;
-            Events["Deploy"].active = true;
-            Events["Stop"].active = false;
 
-            if (DeployAnimation != null)
-            {
-                DeployAnimation[anim_1_name].speed = -1000f;
-                DeployAnimation.Play(anim_1_name);
-            }
 
-            if (ActiveAnimation != null)
-            {
-                ActiveAnimation.Stop(anim_2_name);
-            }
-        }
 
         public void Start()
         {
@@ -134,10 +206,32 @@ namespace DualGenerics
                     toggleAct.actionGroup = defaultActionGroup;
                 if (toggleAct.defaultActionGroup == KSPActionGroup.REPLACEWITHDEFAULT)
                     toggleAct.defaultActionGroup = defaultActionGroup;
+                Actions["ToggleAction"].guiName = Localizer.Format("actionGUIName", moduleType);
 
                 Events["Deploy"].guiName = Localizer.Format(activateActionName, moduleType);
                 Events["Stop"].guiName = Localizer.Format(stopActionName, moduleType);
-                Actions["ToggleAction"].guiName = Localizer.Format("actionGUIName", moduleType);
+
+                if (activateAnim_1_Name != "")
+                    Events["ActivateAnim_1"].guiName = Localizer.Format(activateAnim_1_Name, moduleType);
+                else
+                    Events["ActivateAnim_1"].active = false;
+
+                if (activateAnim_2_Name != "")
+                Events["ActivateAnim_2"].guiName = Localizer.Format(activateAnim_2_Name, moduleType);
+                else
+                    Events["ActivateAnim_2"].active=false;
+
+                if (stopAnim_1_Name != "")
+                    Events["StopAnim_1"].guiName = Localizer.Format(stopAnim_1_Name, moduleType);
+                else
+                    Events["StopAnim_1"].active = false;
+
+                if (stopAnim_2_Name != "")
+                    Events["StopAnim_2"].guiName = Localizer.Format(stopAnim_2_Name, moduleType);
+                else
+                    Events["StopAnim_2"].active = false;
+
+
 
                 DeployAnimation = base.part.FindModelAnimators(anim_1_name).FirstOrDefault();
                 ActiveAnimation = base.part.FindModelAnimators(anim_2_name).FirstOrDefault();
@@ -162,14 +256,27 @@ namespace DualGenerics
 
                 GameEvents.onGamePause.Add(OnPause);
                 GameEvents.onGameUnpause.Add(OnUnpause);
-                if (beaconOn && HighLogic.LoadedSceneIsFlight)
+                if ((beaconOn || anim_1_On || anim_2_On) && HighLogic.LoadedSceneIsFlight)
                 {
-                    Deploy();
+                    if (anim_1_On && !anim_2_On)
+                        StartAnim_1();
+                    if (!anim_1_On && anim_2_On)
+                        StartAnim_2();
+                    if ((!anim_1_On && ! anim_2_On) || (anim_1_On && anim_2_On))
+                        Deploy();
                 }
-                else
+               // else
                 {
                     Events["Deploy"].active = true;
                     Events["Stop"].active = false;
+
+                    if (activateAnim_1_Name != string.Empty)
+                        Events["ActivateAnim_1"].active = true;
+                    if (activateAnim_2_Name != string.Empty)
+                        Events["ActivateAnim_2"].active = true;
+
+                        Events["StopAnim_1"].active = false;
+                        Events["StopAnim_2"].active = false;
                 }
             }
         }
@@ -181,6 +288,7 @@ namespace DualGenerics
         }
 
         #region Pause
+
         protected float animationStartTime;
         protected float pauseStartTime = 0f;
 
