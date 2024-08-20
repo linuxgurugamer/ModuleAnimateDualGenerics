@@ -1,4 +1,4 @@
-ModuleAnimateBeacon
+ModuleAnimateDualGenerics
 
 This mod provides a simple module which lets you have two active animations in the same part working at the same time.
 The basic module stanza is as follows (values shown are defaults)
@@ -18,15 +18,16 @@ The basic module stanza is as follows (values shown are defaults)
 
         activateAnim_1_Name = 
         stopAnim_1_Name = 
+        anim1Repeating = false
 
         // Activate and stop the second animation
 
         activateAnim_2_Name = 
         stopAnim_2_Name = 
+        anim2Repeating = false
 
 		actionGUIName = Turn On <<1>>
 		animSpeed = 1
-		repeating = true
 
         toggleActionName = Toggle <<1>>
 

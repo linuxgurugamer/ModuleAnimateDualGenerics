@@ -1,0 +1,5 @@
+CJHazardspec
+
+So I tried them 1 at a time out on the runway, and only the one using the stock "ModuleLight" had problems.
+
+Toggling the whole thing off had no affect and after a random number of turning spin on and off the whole thing just stops and the toggles for your module and the turn on and off of the stock module would just disappear. The color change options remained though.

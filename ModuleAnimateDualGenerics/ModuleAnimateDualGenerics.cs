@@ -38,7 +38,11 @@ namespace DualGenerics
         public float animSpeed = 1f;
 
         [KSPField]
-        public bool repeating = true;
+        public bool repeating = false;
+        [KSPField]
+        public bool anim1Repeating = false;
+        [KSPField]
+        public bool anim2Repeating = false;
 
         [KSPField]
         public KSPActionGroup defaultActionGroup;
@@ -47,10 +51,15 @@ namespace DualGenerics
 
         [KSPField(isPersistant = true)]
         public bool anim_1_On = false;
-        
+
         [KSPField(isPersistant = true)]
         public bool anim_2_On = false;
 
+        [KSPField(isPersistant = true)]
+        public float anim1Time;
+
+        [KSPField(isPersistant = true)]
+        public float anim2Time;
 
         #endregion
 
@@ -68,6 +77,7 @@ namespace DualGenerics
                 part.Effect(anim_1_name, 1f);
                 DeployAnimation[anim_1_name].speed = 1f;
                 DeployAnimation[anim_1_name].weight = 1f;
+                DeployAnimation[anim_1_name].time = anim1Time;
                 DeployAnimation.Play(anim_1_name);
             }
         }
@@ -90,8 +100,21 @@ namespace DualGenerics
 
             if (DeployAnimation != null)
             {
-                DeployAnimation[anim_1_name].speed = -1000f;
-                DeployAnimation.Play(anim_1_name);
+             anim1Time = DeployAnimation[anim_1_name].time;
+               if (repeating || anim1Repeating)
+                {
+                    DeployAnimation[anim_1_name].speed = 0f;
+                    DeployAnimation.Stop(anim_1_name);
+                }
+                else
+                {
+
+                    DeployAnimation[anim_1_name].speed = -animSpeed;
+                    DeployAnimation[anim_1_name].normalizedTime = 1f;
+                    DeployAnimation[anim_1_name].time = DeployAnimation[anim_1_name].length;
+
+                    DeployAnimation.Play(anim_1_name);
+                }
             }
 
         }
@@ -109,14 +132,18 @@ namespace DualGenerics
             if (ActiveAnimation != null)
             {
                 part.Effect(anim_2_name, 1f);
+                ActiveAnimation[anim_2_name].time = anim2Time;
                 ActiveAnimation[anim_2_name].speed = animSpeed;
-                if (repeating)
+                if (repeating || anim2Repeating)
+                {
                     ActiveAnimation[anim_2_name].wrapMode = WrapMode.Loop;
+                }
                 else
                 {
                     ActiveAnimation[anim_2_name].wrapMode = WrapMode.Once;
                     StartCoroutine("SlowUpdate");
                 }
+
                 ActiveAnimation.Play(anim_2_name);
             }
 
@@ -125,13 +152,23 @@ namespace DualGenerics
         [KSPEvent(guiActive = true, guiActiveEditor = true)]
         void StopAnim_2()
         {
+
             Events["StopAnim_2"].active = false;
             if (activateAnim_2_Name != string.Empty)
                 Events["ActivateAnim_2"].active = true;
 
             if (ActiveAnimation != null)
             {
-                ActiveAnimation.Stop(anim_2_name);
+                anim2Time = ActiveAnimation[anim_2_name].time;
+
+                if (!repeating && !anim2Repeating)
+                {
+                    ActiveAnimation[anim_2_name].speed = -animSpeed;
+                    ActiveAnimation.Play(anim_2_name);
+
+                }
+                else
+                    ActiveAnimation.Stop(anim_2_name);
             }
         }
 
@@ -157,6 +194,7 @@ namespace DualGenerics
         public void Stop()
         {
             beaconOn = false;
+
             Events["Deploy"].active = true;
             Events["Stop"].active = false;
 
@@ -217,9 +255,9 @@ namespace DualGenerics
                     Events["ActivateAnim_1"].active = false;
 
                 if (activateAnim_2_Name != "")
-                Events["ActivateAnim_2"].guiName = Localizer.Format(activateAnim_2_Name, moduleType);
+                    Events["ActivateAnim_2"].guiName = Localizer.Format(activateAnim_2_Name, moduleType);
                 else
-                    Events["ActivateAnim_2"].active=false;
+                    Events["ActivateAnim_2"].active = false;
 
                 if (stopAnim_1_Name != "")
                     Events["StopAnim_1"].guiName = Localizer.Format(stopAnim_1_Name, moduleType);
@@ -262,10 +300,10 @@ namespace DualGenerics
                         StartAnim_1();
                     if (!anim_1_On && anim_2_On)
                         StartAnim_2();
-                    if ((!anim_1_On && ! anim_2_On) || (anim_1_On && anim_2_On))
+                    if ((!anim_1_On && !anim_2_On) || (anim_1_On && anim_2_On))
                         Deploy();
                 }
-               // else
+                // else
                 {
                     Events["Deploy"].active = true;
                     Events["Stop"].active = false;
@@ -275,8 +313,8 @@ namespace DualGenerics
                     if (activateAnim_2_Name != string.Empty)
                         Events["ActivateAnim_2"].active = true;
 
-                        Events["StopAnim_1"].active = false;
-                        Events["StopAnim_2"].active = false;
+                    Events["StopAnim_1"].active = false;
+                    Events["StopAnim_2"].active = false;
                 }
             }
         }
