@@ -1,6 +1,6 @@
 Changelog
 
-0.0.1.4 (unreleased)
+0.0.1.5
 	Removed "repeating" parameter
 	Added anim1Repeating and anim2Repeating
 
